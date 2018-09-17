@@ -53,11 +53,13 @@ void loop()
         digitalWrite(openPin, LOW);
         digitalWrite(stopPin, LOW);
         digitalWrite(closePin, HIGH);
+        Serial.println("c");
         break;
       case 's':
         digitalWrite(openPin, LOW);
         digitalWrite(closePin, LOW);
         digitalWrite(stopPin, HIGH);
+        Serial.println("s");
         break;
       default:
         digitalWrite(openPin, LOW);

@@ -1,5 +1,5 @@
 #include <TimerOne.h>
-#define BTmaster  Serial1
+#define BTmaster Serial1
 String c;
 
 void setup() {
@@ -16,14 +16,14 @@ void loop() {
     c = Serial.readString();
     Serial.print("Command send :");
     Serial.print(c);
-    Serial1.print(c);
+    BTmaster.print(c);
     //wait some time
     delay(100);
   }
 
-  if(Serial1.available())
+  if(BTmaster.available())
   {
-    Serial.write(Serial1.read());
+    Serial.write(BTmaster.read());
   }
 }
 
