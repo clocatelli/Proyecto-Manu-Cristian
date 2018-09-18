@@ -11,6 +11,17 @@ const int stopEnd = 6;   // Pin to stop shutter movement.
 
 char moveDir = 's';      // Set default state of move direction.
 
+int BateryPin = A0;
+
+bool BateryRequest = false;
+
+int bateryLevel()
+{
+  // read the value from the batery
+  //return analogRead(BateryPin);
+  return 1024;
+}
+
 void setup() 
 {
   // Open serial communications and wait for port to open:
@@ -39,27 +50,40 @@ void loop()
 {
   if (BTslave.available()) 
   {
-    Serial.write(BTslave.read());
     moveDir = BTslave.read();
     switch(moveDir)
     {
+      // Case open
       case 'o':
         digitalWrite(closePin, LOW);
         digitalWrite(stopPin, LOW);
         digitalWrite(openPin, HIGH);
+        delay(100);
+        digitalWrite(openPin, LOW);
         Serial.println("o");
         break;
+      // Case close
       case 'c':
         digitalWrite(openPin, LOW);
         digitalWrite(stopPin, LOW);
         digitalWrite(closePin, HIGH);
+        delay(100);
+        digitalWrite(closePin, LOW);
         Serial.println("c");
         break;
+      // Case stop
       case 's':
         digitalWrite(openPin, LOW);
         digitalWrite(closePin, LOW);
         digitalWrite(stopPin, HIGH);
+        delay(100);
+        digitalWrite(stopPin, LOW);
         Serial.println("s");
+        break;
+      // Case batery request
+      case 'b':
+        BTslave.println(bateryLevel());
+        Serial.println("b");
         break;
       default:
         digitalWrite(openPin, LOW);
