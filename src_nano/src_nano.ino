@@ -1,25 +1,32 @@
 #include <SoftwareSerial.h>
 
 SoftwareSerial BTslave(3, 2); // RX, TX
-const int openPin = 7;   // Pin to open shutter.
-const int closePin = 8;  // Pin to close shutter.
-const int stopPin = 9;   // Pin to stop shutter movement.
+const int stopPin = 7;   // Pin to open shutter.
+const int openPin = 8;   // Pin to stop shutter movement.
+const int closePin = 9;  // Pin to close shutter. 
 
-const int openEnd = 4;   // Pin to open shutter.
-const int closeEnd = 5;  // Pin to close shutter.
-const int stopEnd = 6;   // Pin to stop shutter movement.
+const int openEnd = 4;   // Pin to control open end of stroke.
+const int closeEnd = 5;   // Pin to control close end of stroke.
+
+bool prevClose;
+bool prevOpen;
 
 char moveDir = 's';      // Set default state of move direction.
 
 int BateryPin = A0;
 
-bool BateryRequest = false;
-
-int bateryLevel()
+// Reads the value from the batery and compute the value in volts.
+String bateryLevel()
 {
-  // read the value from the batery
-  //return analogRead(BateryPin);
-  return 1024;
+  int batValue;
+  float volts;
+  float coef = 62.83;
+  String sVolts;
+
+  batValue = analogRead(BateryPin);
+  volts = batValue / coef;
+  sVolts = (String) volts;
+  return sVolts;
 }
 
 void setup() 
@@ -30,20 +37,22 @@ void setup()
   // Set pins to input signals.
   pinMode(openEnd, INPUT);
   pinMode(closeEnd, INPUT);
-  pinMode(stopEnd, INPUT);
 
   // Set pins to output signals.
   pinMode(openPin, OUTPUT);
   pinMode(closePin, OUTPUT);
   pinMode(stopPin, OUTPUT);
-  
-  while (!Serial) 
-  {
-  // wait for serial port to connect. Needed for native USB port only
-  }
 
-  // set the data rate for the SoftwareSerial port
+  // wait for serial port to connect. Needed for native USB port only.
+  while (!Serial) {}
+
+  // set the data rate for the SoftwareSerial port.
   BTslave.begin(9600);
+
+  // init end of stroke pins.
+  prevOpen == !(digitalRead(openEnd) == HIGH);
+  prevClose == !(digitalRead(closeEnd) == HIGH);
+  
 }
 
 void loop() 
@@ -60,7 +69,6 @@ void loop()
         digitalWrite(openPin, HIGH);
         delay(100);
         digitalWrite(openPin, LOW);
-        Serial.println("o");
         break;
       // Case close
       case 'c':
@@ -69,7 +77,6 @@ void loop()
         digitalWrite(closePin, HIGH);
         delay(100);
         digitalWrite(closePin, LOW);
-        Serial.println("c");
         break;
       // Case stop
       case 's':
@@ -78,19 +85,45 @@ void loop()
         digitalWrite(stopPin, HIGH);
         delay(100);
         digitalWrite(stopPin, LOW);
-        Serial.println("s");
         break;
       // Case batery request
       case 'b':
         BTslave.println(bateryLevel());
-        Serial.println("b");
-        break;
-      default:
-        digitalWrite(openPin, LOW);
-        digitalWrite(closePin, LOW);
-        digitalWrite(stopPin, HIGH);
         break;
     }
   }
+
+  // VER LOS FINES DE CARRERA --->> NO ANDA
+
+  // Reads the end of stroke pins, which tells us the state.
+  if((digitalRead(openEnd) == HIGH) && (prevOpen == false))
+  {
+    Serial.println("Full open");
+    //BTslave.println("Full open");
+    prevOpen = true;
+  }
+
+  if((digitalRead(openEnd) == LOW) && (prevOpen == true))
+  {
+    Serial.println("Open");
+    //BTslave.println("Full open");
+    prevOpen = false;
+  }
+
+  if((digitalRead(closeEnd) == HIGH) && (prevClose == false))
+  {
+    Serial.println("Full close");
+    //BTslave.println("Full close");
+    prevClose = true;
+  }
+
+  if((digitalRead(closeEnd) == LOW) && (prevClose == true))
+  {
+    Serial.println("Open");
+    //BTslave.println("Full close");
+    prevClose = false;
+  }
+
+
 }
 
