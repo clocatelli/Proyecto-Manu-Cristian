@@ -5,8 +5,9 @@ const int stopPin = 7;   // Pin to open shutter.
 const int openPin = 8;   // Pin to stop shutter movement.
 const int closePin = 9;  // Pin to close shutter. 
 
-const int openEnd = 4;   // Pin to control open end of stroke.
+const int stopEnd = 4;   // Pin to control open end of stroke.
 const int closeEnd = 5;   // Pin to control close end of stroke.
+const int openEnd = 6;   // Pin to control close end of stroke.
 
 bool prevClose;
 bool prevOpen;
@@ -14,20 +15,9 @@ bool prevOpen;
 char moveDir = 's';      // Set default state of move direction.
 
 int BateryPin = A0;
+String endSwStatus;
+String endSwPrevious = "no value";
 
-// Reads the value from the batery and compute the value in volts.
-String bateryLevel()
-{
-  int batValue;
-  float volts;
-  float coef = 62.83;
-  String sVolts;
-
-  batValue = analogRead(BateryPin);
-  volts = batValue / coef;
-  sVolts = (String) volts;
-  return sVolts;
-}
 
 void setup() 
 {
@@ -48,11 +38,6 @@ void setup()
 
   // set the data rate for the SoftwareSerial port.
   BTslave.begin(9600);
-
-  // init end of stroke pins.
-  prevOpen == !(digitalRead(openEnd) == HIGH);
-  prevClose == !(digitalRead(closeEnd) == HIGH);
-  
 }
 
 void loop() 
@@ -69,6 +54,7 @@ void loop()
         digitalWrite(openPin, HIGH);
         delay(100);
         digitalWrite(openPin, LOW);
+        delay(500);
         break;
       // Case close
       case 'c':
@@ -77,6 +63,7 @@ void loop()
         digitalWrite(closePin, HIGH);
         delay(100);
         digitalWrite(closePin, LOW);
+        delay(500);
         break;
       // Case stop
       case 's':
@@ -85,45 +72,51 @@ void loop()
         digitalWrite(stopPin, HIGH);
         delay(100);
         digitalWrite(stopPin, LOW);
+        delay(500);
         break;
       // Case batery request
       case 'b':
         BTslave.println(bateryLevel());
         break;
+      case 'e':
+        BTslave.println(readStatus());
+        break;
     }
   }
 
-  // VER LOS FINES DE CARRERA --->> NO ANDA
-
-  // Reads the end of stroke pins, which tells us the state.
-  if((digitalRead(openEnd) == HIGH) && (prevOpen == false))
-  {
-    Serial.println("Full open");
-    //BTslave.println("Full open");
-    prevOpen = true;
+  endSwStatus = readStatus();
+  if (endSwStatus != endSwPrevious){
+    BTslave.println(endSwStatus);
+    endSwPrevious = endSwStatus;
   }
+  delay(1000);
+}
 
-  if((digitalRead(openEnd) == LOW) && (prevOpen == true))
-  {
-    Serial.println("Open");
-    //BTslave.println("Full open");
-    prevOpen = false;
+
+// Reads the value from the batery and compute the value in volts.
+String bateryLevel()
+{
+  int batValue;
+  float volts;
+  float coef = 62.83;
+  String sVolts;
+
+  batValue = analogRead(BateryPin);
+  volts = batValue / coef;
+  sVolts = (String) volts;
+  return sVolts;
+}
+
+// Reads the end switchs status and return it
+String readStatus(){
+  if (!digitalRead(openEnd)){
+    return "Full Open";
   }
-
-  if((digitalRead(closeEnd) == HIGH) && (prevClose == false))
-  {
-    Serial.println("Full close");
-    //BTslave.println("Full close");
-    prevClose = true;
+  else if (!digitalRead(closeEnd)){
+    return "Close";
   }
-
-  if((digitalRead(closeEnd) == LOW) && (prevClose == true))
-  {
-    Serial.println("Open");
-    //BTslave.println("Full close");
-    prevClose = false;
+  else{
+    return "Open";
   }
-
-
 }
 
