@@ -48,7 +48,7 @@ void loop()
     switch(moveDir)
     {
       // Case open
-      case 'o':
+      case 'a':
         digitalWrite(closePin, LOW);
         digitalWrite(stopPin, LOW);
         digitalWrite(openPin, HIGH);
@@ -57,7 +57,7 @@ void loop()
         delay(500);
         break;
       // Case close
-      case 'c':
+      case 'd':
         digitalWrite(openPin, LOW);
         digitalWrite(stopPin, LOW);
         digitalWrite(closePin, HIGH);
@@ -78,7 +78,7 @@ void loop()
       case 'b':
         BTslave.println(bateryLevel());
         break;
-      case 'e':
+      case 'i':
         BTslave.println(readStatus());
         break;
     }
