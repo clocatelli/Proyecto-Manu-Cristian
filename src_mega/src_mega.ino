@@ -2,24 +2,48 @@
 
 const int focoIn = 7;
 const int focoOut = 8;
-const int moveDer = 9;
-const int moveIzq = 10;
-const int parkCup = 11;
+
+const int moveDer = 11;
+const int moveIzq = 9;
+const int parkCup = 10;
+
 const int dimmer = 4;
+
+const int PowSwitch1 = 40;
+const int PowSwitch2 = 42;
+const int PowSwitch3 = 44;
+const int PowSwitch4 = 46;
 
 char c;
 int intensity = 255;
+
+int pulso = 0;
 
 void setup() {
   // Setup interfaces
   pinMode(moveDer, OUTPUT);
   pinMode(moveIzq, OUTPUT);
   pinMode(parkCup, OUTPUT);
+  
   pinMode(focoIn, OUTPUT);
   pinMode(focoOut, OUTPUT);
+  
   pinMode(dimmer, OUTPUT);
 
+  pinMode(PowSwitch1, OUTPUT);
+  pinMode(PowSwitch2, OUTPUT);
+  pinMode(PowSwitch3, OUTPUT);
+  pinMode(PowSwitch4, OUTPUT);
+
+  digitalWrite(PowSwitch1, HIGH);
+  digitalWrite(PowSwitch2, HIGH);
+  digitalWrite(PowSwitch3, HIGH);
+  digitalWrite(PowSwitch4, HIGH);
+
   analogWrite(dimmer, 255);
+
+  attachInterrupt(0, refPosition, RISING);
+  attachInterrupt(1, encoder, RISING);
   
   BTmaster.begin(9600);
   Serial.begin(9600);
@@ -102,6 +126,31 @@ void loop() {
         intensity = 255;
         analogWrite(dimmer, 255);
         break;
+        
+      case 'r':
+        digitalWrite(PowSwitch1, LOW);
+        break;
+      case 'f':
+        digitalWrite(PowSwitch1, HIGH);
+        break;
+      case 't':
+        digitalWrite(PowSwitch2, LOW);
+        break;
+      case 'g':
+        digitalWrite(PowSwitch2, HIGH);
+        break;
+      case 'y':
+        digitalWrite(PowSwitch3, LOW);
+        break;
+      case 'h':
+        digitalWrite(PowSwitch3, HIGH);
+        break;
+      case 'u':
+        digitalWrite(PowSwitch4, LOW);
+        break;
+      case 'j':
+        digitalWrite(PowSwitch4, HIGH);
+        break;  
     }
     
   }
@@ -110,5 +159,23 @@ void loop() {
   {
     Serial.write(BTmaster.read());
   }
+}
+
+void refPosition()
+{
+  Serial.println("Posicion de referencia.");
+  digitalWrite(moveDer, LOW);
+  digitalWrite(moveIzq, LOW);
+  pulso = 0;
+  Serial.print("Posicion cupula: ");
+  Serial.println(pulso);
+  
+}
+
+void encoder()
+{
+  pulso += 1;
+  Serial.print("Posicion cupula: ");
+  Serial.println(pulso);
 }
 

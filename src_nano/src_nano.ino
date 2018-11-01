@@ -6,8 +6,8 @@ const int openPin = 8;   // Pin to stop shutter movement.
 const int closePin = 9;  // Pin to close shutter. 
 
 const int stopEnd = 4;   // Pin to control open end of stroke.
-const int closeEnd = 5;   // Pin to control close end of stroke.
-const int openEnd = 6;   // Pin to control close end of stroke.
+const int closeEnd = 6;   // Pin to control close end of stroke.
+const int openEnd = 5;   // Pin to control close end of stroke.
 
 bool prevClose;
 bool prevOpen;
